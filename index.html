@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style type="text/css">
+		* {
+			margin: 0;
+			padding: 0;
+		}
+
+		canvas {
+			background: black;
+			display: block;
+			margin: 20px auto;
+		}
+
+		h1 {
+			margin: 20px auto 30px auto;
+			text-align: center;
+			font-size: 72px;
+			color: black;
+			font-family: "Roboto", sans-serif;
+			font-weight: 200;
+		}
+	</style>
+	<meta charset = "utf-8">
+	<meta name= "viewport" content="width = device-width, initial-scale = 1">
+</head>
+
+<body>
+	<h1>Pong</h1>
+	<canvas id = "myCanvas" width = "550" height = "350"></canvas>
+
+	<script type="text/javascript">
+
+		var c = document.getElementById("myCanvas");
+		var ctx = c.getContext("2d");
+
+		var p1  = {
+			width: 10,
+			height: 80,
+			v: 5,
+			x: 10,
+			y: (c.height / 2) - 80 / 2
+		}
+
+		var p2  = {
+			width: 10,
+			height: 80,
+			v: 5,
+			x: c.width - 10 * 2,
+			y: (c.height / 2) - 80 / 2
+		}
+
+		var ball = {
+			radius: 5.5,
+			vx: 2,
+			vy: 2,
+			x: c.width / 2,
+			y: c.height / 2
+		}
+
+		var p1Score = 0;
+		var p2Score = 0;
+
+		var wPressed = false;
+		var sPressed = false;
+
+		var upPressed = false;
+		var downPressed = false;
+
+		document.addEventListener("keydown", keyDownHandler, false);
+		document.addEventListener("keyup", keyUpHandler, false);
+
+		function keyDownHandler(e) {
+			if (e.keyCode == 87) {
+				wPressed = true;
+			} else if (e.keyCode == 83){
+				sPressed = true;
+			}
+
+			if (e.keyCode == 38) {
+				upPressed = true;
+			} else if (e.keyCode == 40){
+				downPressed = true;
+			}
+		}
+
+		function keyUpHandler(e) {
+			if (e.keyCode == 87) {
+				wPressed = false;
+			} else if (e.keyCode == 83){
+				sPressed = false;
+			}
+
+			if (e.keyCode == 38) {
+				upPressed = false;
+			} else if (e.keyCode == 40){
+				downPressed = false;
+			}
+		}
+
+		function draw() {
+			ctx.clearRect(0, 0, c.width, c.height);
+			drawP1();
+			drawP2();
+			drawBall();
+			drawP1Score();
+			drawP2Score();
+			moveP1();
+			moveP2();
+			moveBall();
+			wallColl();
+			pColl();
+			requestAnimationFrame(draw);
+			detScore();
+		}
+
+		function drawP1() {
+			ctx.beginPath();
+			// ctx.rect(0, 0, 100, 100);
+			ctx.rect(p1.x, p1.y, p1.width, p1.height);
+			ctx.fillStyle = "white";
+			ctx.fill();
+			ctx.closePath();
+		}
+
+		function drawP2() {
+			ctx.beginPath();
+			// ctx.rect(0, 0, 100, 100);
+			ctx.rect(p2.x, p2.y, p2.width, p2.height);
+			ctx.fillStyle = "white";
+			ctx.fill();
+			ctx.closePath();
+		}
+
+		function drawBall() {
+			ctx.beginPath();
+			// ctx.rect(0, 0, 100, 100);
+			ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+			ctx.fillStyle = "white";
+			ctx.fill();
+			ctx.closePath();
+		}
+
+		function moveBall() {
+			ball.x += ball.vx;
+			ball.y += ball.vy;
+		}
+
+		function reset() {
+			ball.x = c.width / 2;
+			ball.y = c.height / 2;
+		}
+
+		function drawLine() {
+			ctx.setLineDash([15, 40]);
+
+			ctx.beginPath();
+			ctx.moveTo(c.width / 2, 0);
+			ctx.lineTo(c.width / 2, c.height);
+			// ctx.strokeStyle = "white";
+			ctx.stroke();
+			ctx.closePath();
+
+		}
+
+		function drawP1Score() {
+			ctx.font = "bold 24px Roboto";
+			ctx.fillStyle = "white";
+			ctx.fillText("P1: " + p1Score, c.width / 2 - 200, 40);
+		}
+
+		function drawP2Score() {
+			ctx.font = "bold 24px Roboto";
+			ctx.fillStyle = "white";
+			ctx.fillText("P2: " + p2Score, c.width / 2 + 150, 40);
+		}
+
+		function detScore() {
+			if (p1Score == 2 || p2Score == 2) {
+				ball.vx++;
+				ball.vy++;
+			}
+			if (p1Score == 4 || p2Score == 4) {
+				ball.vx++;
+				ball.vy++;
+			}
+			if (p1Score == 6 || p2Score == 6) {
+				ball.vx++;
+				ball.vy++;
+			}
+			if (p1Score == 8 || p2Score == 8) {
+				ball.vx++;
+				ball.vy++;
+			}
+			if (p1Score == 10 || p2Score == 10) {
+				document.location.reload();
+			}
+			console.log(ball.vx + " " + ball.vy)
+		}
+
+		function pColl() {
+			if (ball.x > p1.x + ball.radius && ball.x < p1.x + p1.width + ball.radius && ball.y > p1.y && ball.y < p1.y + p1.height) {
+				ball.x = p1.x + p1.width + ball.radius + 1;
+				ball.vx *= -1;
+			}
+			if (ball.x > p2.x - ball.radius && ball.x < p2.x + p2.width - ball.radius && ball.y > p2.y && ball.y < p2.y + p2.height) {
+				ball.x = p2.x - ball.radius - 1;
+				ball.vx *= -1;
+			}
+		}
+
+		function wallColl() {
+			if (ball.x < 0 + ball.radius || ball.x > c.width - ball.radius) {
+				if (ball.x < 0 + ball.radius) {
+					p2Score++;
+					reset();
+				} else if (ball.x > c.width - ball.radius){
+					p1Score++;
+					reset();
+				}
+				// document.location.reload();
+			}
+			if (ball.y < 0 + ball.radius || ball.y > c.height - ball.radius) {
+				ball.vy *= -1;
+			}
+		}
+
+		function moveP1() {
+			if (p1.y > 0 && wPressed) {
+				p1.y -= p1.v;
+			} else if (p1.y < c.height - p1.height && sPressed) {
+				p1.y += p1.v;
+			}
+		}
+
+		function moveP2() {
+			if (p2.y > 0 && upPressed) {
+				p2.y -= p2.v;
+			} else if (p2.y < c.height - p2.height && downPressed) {
+				p2.y += p2.v;
+			}
+		}
+
+		draw();
+
+	</script>
+
+</body>
+
+</html>
